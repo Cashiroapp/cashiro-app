@@ -925,8 +925,8 @@ ${items.map(({ s, venc, badge, clase }) => `
       <div style="display:flex;align-items:center;gap:8px">
 <button class="btn-pagar-servicio ${s.pagado ? 'pagado' : ''}" 
   onclick="event.stopPropagation(); togglePagoServicio('${s.id}')"
-  title="${s.pagado ? 'Marcar como pendiente' : 'Marcar como pagado'}">
-          ${s.pagado ? '✓ Pagado' : 'Pagado'}
+  title="Registrar pago">
+          ✓
         </button>
         <span class="venc-badge ${clase}">${badge}</span>
       </div>
