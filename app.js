@@ -815,7 +815,60 @@ const ingresos     = cargarIngresos();
           <span class="${m.movType === 'ingreso' ? 'gasto-monto-pos' : 'gasto-monto-neg'}">${m.movType === 'ingreso' ? '+' : '-'}$${formatNum(m.monto)}</span>
         </div>`).join('') + '<p class="edit-hint">Toca cualquier movimiento para editar ✏️</p>';
 }
+function togglePagoServicio(id) {
+  const servicios = getData('servicios');
+  const idx = servicios.findIndex(s => String(s.id) === String(id));
+  if (idx < 0) return;
 
+  const s = servicios[idx];
+  const hoy = new Date();
+
+  // Calcular próximo vencimiento
+  let proximoMes  = hoy.getMonth() + 1;
+  let proximoAnio = hoy.getFullYear();
+  if (proximoMes > 11) {
+    proximoMes  = 0;
+    proximoAnio = proximoAnio + 1;
+  }
+
+  // Siempre reinicia al próximo mes y vuelve a estado normal
+  servicios[idx].pagado          = false;
+  servicios[idx].fechaPago       = getFechaLocal();
+  servicios[idx].mesVencimiento  = proximoMes;
+  servicios[idx].anioVencimiento = proximoAnio;
+
+  setData('servicios', servicios);
+  if (modoGoogle) guardarEnFirebase('servicios', servicios[idx].id, servicios[idx]);
+  showToast('✅ ' + s.nombre + ' pagado — próximo vencimiento actualizado');
+  console.log('SERVICIOS GUARDADOS:', getData('servicios'));
+  renderDashboard();
+}
+
+function resetearPagosMesAnterior() {
+  const servicios = getData('servicios');
+  const hoy       = new Date();
+  let cambios     = false;
+
+  servicios.forEach((s, idx) => {
+    if (s.pagado && s.fechaPago) {
+      const fechaPago = new Date(s.fechaPago + 'T00:00:00');
+      // Si el pago fue de un mes anterior, resetear
+      if (fechaPago.getMonth() !== hoy.getMonth() || 
+          fechaPago.getFullYear() !== hoy.getFullYear()) {
+        servicios[idx].pagado    = false;
+        servicios[idx].fechaPago = null;
+        cambios = true;
+      }
+    }
+  });
+
+  if (cambios) {
+    setData('servicios', servicios);
+    servicios.forEach(s => {
+      if (modoGoogle) guardarEnFirebase('servicios', s.id, s);
+    });
+  }
+}
 function renderVencimientos(hoy) {
   const servicios = getData('servicios');
   const lista     = document.getElementById('lista-vencimientos');
@@ -828,9 +881,22 @@ const hoyInicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
 const totalServicios = servicios.reduce((acc, s) => {
   return acc + Number(s.monto || 0);
 }, 0);
-  const items = servicios.map(s => {
-    let venc = new Date(hoy.getFullYear(), hoy.getMonth(), s.dia);
-    if (venc < hoyInicio) venc = new Date(hoy.getFullYear(), hoy.getMonth() + 1, s.dia);
+const items = servicios.map(s => {
+    let venc;
+   if (
+  s.mesVencimiento !== null &&
+  s.mesVencimiento !== undefined &&
+  s.anioVencimiento !== null &&
+  s.anioVencimiento !== undefined
+) {
+  venc = new Date(s.anioVencimiento, s.mesVencimiento, s.dia);
+} else {
+  venc = new Date(hoy.getFullYear(), hoy.getMonth(), s.dia);
+
+  if (venc < hoyInicio) {
+    venc = new Date(hoy.getFullYear(), hoy.getMonth() + 1, s.dia);
+  }
+}
     const dias = Math.ceil((venc - hoyInicio) / 86400000);
     let badge, clase;
     if (dias === 0)     { badge = `🔴 Hoy`;       clase = 'badge-urgente'; }
@@ -847,17 +913,23 @@ lista.innerHTML = `
     </span>
   </div>
 
-  ${items.map(({ s, venc, badge, clase }) => `
-    <div class="venc-item" onclick="editarServicio('${s.id}')">
-      <div class="venc-info">
+${items.map(({ s, venc, badge, clase }) => `
+    <div class="venc-item ${s.pagado ? 'venc-pagado' : ''}"onclick="editarServicio('${s.id}')">
+        <div class="venc-info">
         <span class="venc-nombre">${s.nombre}</span>
         <span class="venc-fecha">
           Vence: ${formatFecha(`${venc.getFullYear()}-${String(venc.getMonth()+1).padStart(2,'0')}-${String(venc.getDate()).padStart(2,'0')}`)}
           · $${formatNum(s.monto)}
         </span>
       </div>
-
-      <span class="venc-badge ${clase}">${badge}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+<button class="btn-pagar-servicio ${s.pagado ? 'pagado' : ''}" 
+  onclick="event.stopPropagation(); togglePagoServicio('${s.id}')"
+  title="${s.pagado ? 'Marcar como pendiente' : 'Marcar como pagado'}">
+          ${s.pagado ? '✓ Pagado' : 'Pagado'}
+        </button>
+        <span class="venc-badge ${clase}">${badge}</span>
+      </div>
     </div>
   `).join('')}
 `;
@@ -952,7 +1024,7 @@ function renderHistorial() {
       <div class="mes-card">
         <div class="mes-header" onclick="toggleMes('mes-h-${i}')">
           <span class="mes-nombre">📅 ${MESES[mes]} ${anio}</span>
-          <span class="mes-total">${total >= 0 ? '+' : '-'}$${formatNum(Math.abs(total))}</span>
+          <span class="mes-total ${total >= 0 ? 'positivo' : 'negativo'}">${total >= 0 ? '+' : '-'}$${formatNum(Math.abs(total))}</span>
         </div>
         <div class="mes-body" id="mes-h-${i}" style="display:none">
           <div style="margin-bottom:12px">${catHtml}</div>
