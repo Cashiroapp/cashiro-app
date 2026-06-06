@@ -822,6 +822,12 @@ function togglePagoServicio(id) {
 
   const s = servicios[idx];
   const hoy = new Date();
+  const fechaHoy = getFechaLocal();
+
+if (s.fechaPago === fechaHoy) {
+  showToast('⚠️ Este servicio ya fue pagado hoy');
+  return;
+}
 
   // Calcular próximo vencimiento
   let proximoMes  = hoy.getMonth() + 1;
@@ -837,9 +843,30 @@ function togglePagoServicio(id) {
   servicios[idx].mesVencimiento  = proximoMes;
   servicios[idx].anioVencimiento = proximoAnio;
 
+  // Crear gasto automático por pago del servicio
+const gastos = getData('gastos');
+
+const nuevoGasto = {
+  id: Date.now(),
+  cat: 'Servicios',
+  desc: s.nombre,
+  monto: Number(s.monto || 0),
+  fecha: getFechaLocal(),
+  tipo: 'variable',
+  fechaFin: null,
+  activo: true
+};
+
+gastos.push(nuevoGasto);
+setData('gastos', gastos);
+
+if (modoGoogle) {
+  guardarEnFirebase('gastos', nuevoGasto.id, nuevoGasto);
+}
+
   setData('servicios', servicios);
   if (modoGoogle) guardarEnFirebase('servicios', servicios[idx].id, servicios[idx]);
-  showToast('✅ ' + s.nombre + ' pagado — próximo vencimiento actualizado');
+  showToast('✅ Servicio pagado y gasto registrado');
   console.log('SERVICIOS GUARDADOS:', getData('servicios'));
   renderDashboard();
 }
