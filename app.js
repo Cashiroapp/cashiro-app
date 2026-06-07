@@ -197,6 +197,9 @@ function showProfileFeedback(message, isError = false) {
 
 // ===== NAVEGACIÓN =====
 function showScreen(id) {
+  if (id !== 'screen-servicios') {
+  limpiarFormularioServicio();
+}
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
     s.style.display = 'none';
@@ -675,12 +678,12 @@ function guardarServicio() {
     const actualizado = servicios.find(s => s.id == window.servicioEditando);
     if (modoGoogle && actualizado) guardarEnFirebase('servicios', actualizado.id, actualizado);
     window.servicioEditando = null;
-    showToast('✅ Servicio actualizado');
+    showToast('✅ Obligación actualizada');
   } else {
     const nuevo = { id: Date.now(), nombre, monto, dia };
     servicios.push(nuevo);
     if (modoGoogle) guardarEnFirebase('servicios', nuevo.id, nuevo);
-    showToast('✅ Servicio agregado');
+    showToast('✅  Obligación agregada');
   }
 
   setData('servicios', servicios);
@@ -698,7 +701,7 @@ function eliminarServicio(id) {
   setData('servicios', getData('servicios').filter(s => s.id !== id));
   if (modoGoogle) eliminarDeFirebase('servicios', id);
   renderServicios();
-  showToast('🗑️ Servicio eliminado');
+  showToast('🗑️ Obligación eliminada');
 }
 
 function renderServicios() {
@@ -933,8 +936,8 @@ const items = servicios.map(s => {
     return { s, dias, badge, clase, venc };
   }).sort((a, b) => a.dias - b.dias);
 lista.innerHTML = `
-  <div class="servicios-total-card">
-    <span class="servicios-total-label">Total servicios</span>
+<div class="servicios-total-card">
+  <span class="servicios-total-label">Obligaciones mensuales</span>
     <span class="servicios-total-monto">
       $${formatNum(totalServicios)}/mes
     </span>
@@ -960,19 +963,12 @@ ${items.map(({ s, venc, badge, clase }) => `
     </div>
   `).join('')}
 `;
-function editarServicio(id) {
-  const servicios = getData('servicios');
-  const servicio = servicios.find(s => s.id == id);
+function limpiarFormularioServicio() {
+  document.getElementById('srv-nombre').value = '';
+  document.getElementById('srv-monto').value = '';
+  document.getElementById('srv-dia').value = '';
 
-  if (!servicio) return;
-
-  document.getElementById('srv-nombre').value = servicio.nombre;
-  document.getElementById('srv-monto').value = servicio.monto;
-  document.getElementById('srv-dia').value = servicio.dia;
-
-  window.servicioEditando = id;
-
-  showScreen('screen-servicios');
+  window.servicioEditando = null;
 }
 }
 
@@ -989,6 +985,14 @@ function editarServicio(id) {
   showScreen('screen-servicios');
 
   window.servicioEditando = id;
+}
+
+function limpiarFormularioServicio() {
+  document.getElementById('srv-nombre').value = '';
+  document.getElementById('srv-monto').value = '';
+  document.getElementById('srv-dia').value = '';
+
+  window.servicioEditando = null;
 }
 
 // ===== HISTORIAL =====
