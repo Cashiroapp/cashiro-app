@@ -1473,7 +1473,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Verificar sesión activa
 let user = null;
   try {
-user = await getCurrentUser();
+user = await Promise.race([
+  getCurrentUser(),
+  new Promise(resolve => setTimeout(() => resolve(null), 5000))
+]);
     if (user) {
       currentUser = user;
       modoGoogle  = true;

@@ -9,8 +9,10 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth     = firebase.auth();
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-  .catch(err => console.error('Persistence error:', err));
+user = await Promise.race([
+  getCurrentUser(),
+  new Promise(resolve => setTimeout(() => resolve(null), 5000))
+]);
 const db       = firebase.firestore();
 const provider = new firebase.auth.GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
