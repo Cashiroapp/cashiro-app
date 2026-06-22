@@ -12,6 +12,24 @@ let loadingSaveProfile = false;
 let profileNameDraft = '';
 let profileNameError = '';
 
+// ===== VERSION CONTROL =====
+const APP_VERSION = "1.2.8";
+
+const savedVersion = localStorage.getItem('appVersion');
+
+if (savedVersion !== APP_VERSION) {
+
+    localStorage.setItem('appVersion', APP_VERSION);
+
+    if ('caches' in window) {
+        caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+        });
+    }
+
+    console.log("Cache actualizado");
+}
+
 // ===== STORAGE =====
 function getData(key) {
   try { return JSON.parse(localStorage.getItem(userId + '_' + key)) || []; }
@@ -402,7 +420,7 @@ const [gastosNube, ingresosNube, serviciosNube, perfilNube] = await Promise.all(
   }
 }
 
-// ===== INGRESO MENSUAL =====
+// ==== INGRESO MENSUAL =====
 function poblarSelectMes() {
   const sel = document.getElementById('ingreso-mes');
   sel.innerHTML = MESES.map((m, i) =>
