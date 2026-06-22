@@ -15,32 +15,17 @@ const db       = firebase.firestore();
 const provider = new firebase.auth.GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
-//async function loginGoogle() {
-  //try {
-    //const result = await auth.signInWithPopup(provider);
-   // return result.user;
-  //} catch(e) {
- //   console.error('loginGoogle error:', e.code, e.message);
- //   return null;
- // }
-//}
-
 async function loginGoogle() {
   try {
     const result = await auth.signInWithPopup(provider);
     return result.user;
   } catch(e) {
-
-    console.error('loginGoogle error:', e.code, e.message);
-
-    alert(
-      'Código:\n' + e.code +
-      '\n\nMensaje:\n' + e.message
-    );
-
+   console.error('loginGoogle error:', e.code, e.message);
     return null;
-  }
+ }
 }
+
+
 
 async function logoutGoogle() {
   await auth.signOut();
