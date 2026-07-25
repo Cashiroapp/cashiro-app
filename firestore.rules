@@ -1,0 +1,121 @@
+rules_version = '2';
+
+// PROPUESTA FASE 1.1 — NO DESPLEGAR COMO REEMPLAZO COMPLETO.
+//
+// Este archivo contiene únicamente el bloque de Inversiones. Antes de usarlo,
+// integrar manualmente sus funciones y el match /investmentSpaces/{spaceId}
+// dentro de las reglas vigentes de producción. No reemplaza ni redefine las
+// reglas actuales del módulo personal usuarios/{uid}/...
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isGoogleAuthenticated() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+
+    function membershipPath(spaceId, uid) {
+      return /databases/$(database)/documents/investmentSpaces/$(spaceId)/members/$(uid);
+    }
+
+    function hasExpectedMembershipSchema(membership) {
+      return membership.keys().hasAll([
+          'displayName',
+          'email',
+          'roles',
+          'status'
+        ])
+        && membership.keys().hasOnly([
+          'displayName',
+          'email',
+          'roles',
+          'status',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy'
+        ])
+        && membership.displayName is string
+        && membership.email is string
+        && membership.status is string
+        && membership.roles is list
+        && membership.roles.size() > 0
+        && membership.roles.size() <= 3
+        && membership.roles.hasOnly(['admin', 'investor', 'manager']);
+    }
+
+    function hasValidActiveMembership(spaceId) {
+      return isGoogleAuthenticated()
+        && exists(membershipPath(spaceId, request.auth.uid))
+        && hasExpectedMembershipSchema(
+          get(membershipPath(spaceId, request.auth.uid)).data
+        )
+        && get(membershipPath(spaceId, request.auth.uid)).data.status == 'active';
+    }
+
+    function hasRole(spaceId, role) {
+      return hasValidActiveMembership(spaceId)
+        && role in get(membershipPath(spaceId, request.auth.uid)).data.roles;
+    }
+
+    // INICIO DEL BLOQUE A INTEGRAR MANUALMENTE.
+    match /investmentSpaces/{spaceId} {
+      allow get: if hasValidActiveMembership(spaceId);
+      allow list, create, update, delete: if false;
+
+      match /members/{memberId} {
+        // Cada usuario Google puede consultar exclusivamente su membresía.
+        allow get: if isGoogleAuthenticated()
+          && request.auth.uid == memberId;
+
+        // El listado completo queda reservado al admin válido.
+        allow list: if hasRole(spaceId, 'admin');
+
+        // La administración de miembros no existe todavía en la interfaz.
+        allow create, update, delete: if false;
+      }
+
+      // Colecciones futuras: bloqueadas explícitamente durante la Fase 1.
+      match /investments/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /clients/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /assets/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /periods/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /transactions/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /investorPayments/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /supports/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /supportLinks/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /auditEvents/{document=**} {
+        allow read, write: if false;
+      }
+
+      match /{document=**} {
+        allow read, write: if false;
+      }
+    }
+    // FIN DEL BLOQUE A INTEGRAR MANUALMENTE.
+  }
+}

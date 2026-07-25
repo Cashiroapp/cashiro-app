@@ -1,0 +1,221 @@
+.investments-body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(58, 134, 255, 0.15), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(0, 227, 140, 0.1), transparent 30%),
+    var(--dark);
+}
+
+.investments-shell {
+  width: min(100%, 720px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+.investments-topbar {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.investments-topbar h1 {
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.investments-eyebrow {
+  margin-bottom: 3px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.investments-back {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 22px;
+  text-decoration: none;
+}
+
+.access-state {
+  display: none;
+  margin-top: 32px;
+  padding: 32px 24px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: rgba(26, 34, 51, 0.94);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.access-state.is-visible {
+  display: block;
+}
+
+.access-state h2 {
+  margin-bottom: 10px;
+  font-size: 23px;
+}
+
+.access-state > p {
+  max-width: 500px;
+  margin: 0 auto 22px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.state-icon {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+  border: 1px solid rgba(0, 227, 140, 0.25);
+  border-radius: 22px;
+  background: rgba(0, 227, 140, 0.08);
+  font-size: 30px;
+}
+
+.state-icon-loading {
+  position: relative;
+}
+
+.state-icon-loading::after {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(234, 242, 255, 0.15);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  content: "";
+  animation: investments-spin 0.8s linear infinite;
+}
+
+@keyframes investments-spin {
+  to { transform: rotate(360deg); }
+}
+
+.state-detail {
+  margin: 16px 0 !important;
+  color: var(--text-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.investments-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.access-allowed {
+  padding: 24px;
+  text-align: left;
+}
+
+.allowed-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.allowed-heading h2 {
+  margin-bottom: 0;
+}
+
+.btn-compact {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+}
+
+.investment-summary,
+.role-panel {
+  margin-top: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(11, 15, 26, 0.55);
+}
+
+.investment-summary h3,
+.role-panel h3 {
+  margin: 6px 0 8px;
+  font-size: 18px;
+}
+
+.investment-summary p,
+.role-panel p {
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.summary-label {
+  color: var(--primary) !important;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.role-panel {
+  display: none;
+}
+
+.role-panel.is-visible {
+  display: block;
+}
+
+.role-badge {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(58, 134, 255, 0.14);
+  color: #79adff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.role-badge-investor {
+  background: rgba(0, 227, 140, 0.12);
+  color: var(--primary);
+}
+
+.role-badge-manager {
+  background: rgba(255, 200, 87, 0.12);
+  color: var(--warning);
+}
+
+@media (max-width: 480px) {
+  .investments-shell {
+    padding-inline: 12px;
+  }
+
+  .access-state {
+    margin-top: 20px;
+    padding: 26px 18px;
+  }
+
+  .access-allowed {
+    padding: 20px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state-icon-loading::after {
+    animation-duration: 1.8s;
+  }
+}

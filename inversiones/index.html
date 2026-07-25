@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0B0F1A">
+  <meta name="robots" content="noindex">
+  <title>Inversiones | Cashiro</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./inversiones.css">
+</head>
+<body class="investments-body">
+  <main class="investments-shell" aria-live="polite">
+    <header class="investments-topbar">
+      <a class="investments-back" href="../index.html" aria-label="Volver a Cashiro">←</a>
+      <div>
+        <p class="investments-eyebrow">Cashiro</p>
+        <h1>Inversiones</h1>
+      </div>
+    </header>
+
+    <section id="state-loading" class="access-state is-visible" data-access-state="loading">
+      <div class="state-icon state-icon-loading" aria-hidden="true"></div>
+      <h2>Cargando sesión</h2>
+      <p>Estamos verificando tu cuenta de Google y tus permisos.</p>
+    </section>
+
+    <section id="state-signed-out" class="access-state" data-access-state="signed-out">
+      <div class="state-icon" aria-hidden="true">🔐</div>
+      <h2>Inicia sesión con Google</h2>
+      <p>El módulo Inversiones no está disponible en modo invitado.</p>
+      <button id="btn-google-login" class="btn-primary" type="button">Continuar con Google</button>
+      <p id="login-error" class="state-detail" role="alert"></p>
+    </section>
+
+    <section id="state-no-membership" class="access-state" data-access-state="no-membership">
+      <div class="state-icon" aria-hidden="true">👤</div>
+      <h2>Usuario sin membresía</h2>
+      <p>Tu cuenta de Google es válida, pero aún no está vinculada al espacio de inversión.</p>
+      <p id="no-membership-email" class="state-detail"></p>
+      <a class="btn-secondary investments-link-button" href="../index.html">Volver a Cashiro</a>
+    </section>
+
+    <section id="state-denied" class="access-state" data-access-state="denied">
+      <div class="state-icon" aria-hidden="true">⛔</div>
+      <h2>Acceso denegado</h2>
+      <p>La membresía está inactiva o no contiene un rol permitido.</p>
+      <p id="denied-detail" class="state-detail"></p>
+      <button class="btn-secondary" type="button" data-action="sign-out">Cambiar de cuenta</button>
+    </section>
+
+    <section id="state-error" class="access-state" data-access-state="error">
+      <div class="state-icon" aria-hidden="true">⚠️</div>
+      <h2 id="access-error-title">Error de conexión</h2>
+      <p id="access-error-message">No fue posible verificar tu acceso. Tus finanzas personales no se han modificado.</p>
+      <p id="connection-error-detail" class="state-detail" role="alert"></p>
+      <button id="btn-retry" class="btn-primary" type="button">Reintentar</button>
+    </section>
+
+    <section id="state-allowed" class="access-state access-allowed" data-access-state="allowed">
+      <div class="allowed-heading">
+        <div>
+          <p class="investments-eyebrow">Acceso permitido</p>
+          <h2 id="welcome-title">Bienvenido</h2>
+          <p id="welcome-email" class="state-detail"></p>
+        </div>
+        <button class="btn-secondary btn-compact" type="button" data-action="sign-out">Salir</button>
+      </div>
+
+      <div class="investment-summary">
+        <p class="summary-label">Contexto operativo</p>
+        <h3 id="space-name">Box de CrossFit</h3>
+        <p>Este es el acceso inicial del MVP. La información operativa se agregará en las siguientes fases.</p>
+      </div>
+
+      <div id="role-admin" class="role-panel" data-role-panel="admin">
+        <span class="role-badge">Admin</span>
+        <h3>Configuración y control</h3>
+        <p>Podrás configurar la inversión, administrar miembros y realizar correcciones excepcionales.</p>
+      </div>
+
+      <div id="role-investor" class="role-panel" data-role-panel="investor">
+        <span class="role-badge role-badge-investor">Investor</span>
+        <h3>Seguimiento de la inversión</h3>
+        <p>Podrás consultar la operación, los pagos y la recuperación del capital.</p>
+      </div>
+
+      <div id="role-manager" class="role-panel" data-role-panel="manager">
+        <span class="role-badge role-badge-manager">Manager</span>
+        <h3>Gestión operativa</h3>
+        <p>Podrás registrar la operación y preparar los cierres financieros del box.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase.js"></script>
+  <script src="./js/investments-utils.js"></script>
+  <script src="./js/investments-state.js"></script>
+  <script src="./js/investments-permissions.js"></script>
+  <script src="./js/investments-repository.js"></script>
+  <script src="./js/investments-auth.js"></script>
+  <script src="./js/investments-app.js"></script>
+</body>
+</html>
