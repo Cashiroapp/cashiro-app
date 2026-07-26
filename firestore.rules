@@ -1,14 +1,26 @@
 rules_version = '2';
 
-// PROPUESTA FASE 1.1 — NO DESPLEGAR COMO REEMPLAZO COMPLETO.
-//
-// Este archivo contiene únicamente el bloque de Inversiones. Antes de usarlo,
-// integrar manualmente sus funciones y el match /investmentSpaces/{spaceId}
-// dentro de las reglas vigentes de producción. No reemplaza ni redefine las
-// reglas actuales del módulo personal usuarios/{uid}/...
-
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ============================================================
+    // CASHIRO PERSONAL — REGLAS VIGENTES DE PRODUCCIÓN
+    // Conservan el acceso del usuario a su documento y subcolecciones.
+    // ============================================================
+    match /usuarios/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+
+      match /{document=**} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
+    }
+
+    // ============================================================
+    // CASHIRO INVERSIONES — FASE 1.2
+    // Acceso de solo lectura, limitado por proveedor y membresía.
+    // ============================================================
     function isGoogleAuthenticated() {
       return request.auth != null
         && request.auth.token.firebase.sign_in_provider == 'google.com';
@@ -58,24 +70,24 @@ service cloud.firestore {
         && role in get(membershipPath(spaceId, request.auth.uid)).data.roles;
     }
 
-    // INICIO DEL BLOQUE A INTEGRAR MANUALMENTE.
     match /investmentSpaces/{spaceId} {
+      // No se permite enumerar, crear, modificar ni eliminar espacios.
       allow get: if hasValidActiveMembership(spaceId);
       allow list, create, update, delete: if false;
 
       match /members/{memberId} {
-        // Cada usuario Google puede consultar exclusivamente su membresía.
+        // Cada usuario autenticado con Google puede consultar su membresía.
         allow get: if isGoogleAuthenticated()
           && request.auth.uid == memberId;
 
-        // El listado completo queda reservado al admin válido.
+        // Solo un admin con membresía activa y válida puede listar miembros.
         allow list: if hasRole(spaceId, 'admin');
 
-        // La administración de miembros no existe todavía en la interfaz.
+        // La administración de miembros no está habilitada en la Fase 1.
         allow create, update, delete: if false;
       }
 
-      // Colecciones futuras: bloqueadas explícitamente durante la Fase 1.
+      // Colecciones de fases futuras: acceso completamente bloqueado.
       match /investments/{document=**} {
         allow read, write: if false;
       }
@@ -112,10 +124,10 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      // Catch-all exclusivo de Inversiones. No afecta otras colecciones.
       match /{document=**} {
         allow read, write: if false;
       }
     }
-    // FIN DEL BLOQUE A INTEGRAR MANUALMENTE.
   }
 }
